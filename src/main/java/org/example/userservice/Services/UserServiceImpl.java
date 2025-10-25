@@ -1,5 +1,6 @@
 package org.example.userservice.Services;
 
+import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.example.userservice.Exceptions.InvalidTokenException;
 import org.example.userservice.Exceptions.PasswordMismatchException;
@@ -12,6 +13,7 @@ import org.example.userservice.Repositories.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -59,7 +61,7 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
-    public Token login(String email, String password) throws PasswordMismatchException {
+    public String login(String email, String password) throws PasswordMismatchException {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if(optionalUser.isEmpty())
@@ -79,7 +81,7 @@ public class UserServiceImpl implements UserService
 
         // If the password matches, then the login is successful and we should generate the token
 
-        Token token = new Token();
+      /*  Token token = new Token();
 
         token.setUser(user);
         token.setTokenValue(RandomStringUtils.randomAlphanumeric(128));
@@ -90,6 +92,38 @@ public class UserServiceImpl implements UserService
         token.setExpiryDate(date);
 
         return tokenRepository.save(token);
+
+       */
+
+        //Generate a JWT token instead of random alphanumeric token
+
+        // 3 parameters for JWT: Header, Payload, Signature, A.B.C format
+
+        // Header: Algorithm and Token Type
+        // Payload: Claims (user information, expiry date, issued at, etc)
+        // Signature
+
+        String userData = "{\n" +
+                "   \"email\": \"mukherjeesneha037@gmail.com\",\n" +
+                "   \"roles\": [\n" +
+                "      \"Guest\",\n" +
+                "      \"Buyer\"\n" +
+                "   ],\n" +
+                "   \"expiryDate\": \"22ndSept2026\"\n" +
+                "}";
+          /*
+          Byte array is used to represent binary data. In the context of JWT (JSON Web Token),
+            the payload is the part of the token that contains the claims or information about the user.
+            JJWT accepts the payload as a byte array to allow for flexibility in encoding and decoding the data.
+           */
+        byte[] payload = userData.getBytes(StandardCharsets.UTF_8);
+
+        /*
+        Using builder pattern here to create JWT token
+         */
+        String token = Jwts.builder().content(payload).compact();
+
+        return token;
     }
 
     @Override

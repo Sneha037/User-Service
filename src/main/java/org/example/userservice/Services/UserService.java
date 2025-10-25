@@ -9,7 +9,13 @@ public interface UserService
 {
     User signup(String name, String email, String password);
 
-    Token login(String email, String password) throws PasswordMismatchException;
+    /*
+    Changing the method signature to return String instead of Token to accomodate JWT token representation
+    We do not need to return the entire Token object, asd JWTs are self validating and contain all necessary information
+     */
+    //Token login(String email, String password) throws PasswordMismatchException;
+
+    String login(String email, String password) throws PasswordMismatchException;
 
     User validateToken(String tokenValue) throws InvalidTokenException;
 }

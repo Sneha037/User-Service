@@ -41,15 +41,15 @@ public class UserController
      }
 
      @PostMapping("/login")
-     public ResponseEntity<TokenDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) throws PasswordMismatchException {
-         Token token  = userService.login(
+     public ResponseEntity<String> login(@RequestBody LoginRequestDTO loginRequestDTO) throws PasswordMismatchException {
+         String token  = userService.login(
                  loginRequestDTO.getEmail(),
                  loginRequestDTO.getPassword()
          );
 
-         TokenDTO tokenDTO = TokenDTO.from(token);
+        // TokenDTO tokenDTO = TokenDTO.from(token);
 
-         ResponseEntity<TokenDTO> response = ResponseEntity.ok(tokenDTO);
+         ResponseEntity<String> response = ResponseEntity.ok(token);
 
          return response;
      }
