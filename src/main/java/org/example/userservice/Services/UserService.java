@@ -1,5 +1,6 @@
 package org.example.userservice.Services;
 
+import org.example.userservice.Exceptions.InvalidTokenException;
 import org.example.userservice.Exceptions.PasswordMismatchException;
 import org.example.userservice.Models.Token;
 import org.example.userservice.Models.User;
@@ -10,5 +11,5 @@ public interface UserService
 
     Token login(String email, String password) throws PasswordMismatchException;
 
-    User validateToken(String tokenValue);
+    User validateToken(String tokenValue) throws InvalidTokenException;
 }

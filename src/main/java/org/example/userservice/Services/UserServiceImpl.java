@@ -1,9 +1,12 @@
 package org.example.userservice.Services;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.example.userservice.Exceptions.InvalidTokenException;
 import org.example.userservice.Exceptions.PasswordMismatchException;
+import org.example.userservice.Models.Role;
 import org.example.userservice.Models.Token;
 import org.example.userservice.Models.User;
+import org.example.userservice.Repositories.RoleRepository;
 import org.example.userservice.Repositories.TokenRepository;
 import org.example.userservice.Repositories.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,11 +23,14 @@ public class UserServiceImpl implements UserService
     UserRepository userRepository;
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, TokenRepository tokenRepository)
+    RoleRepository roleRepository;
+
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, TokenRepository tokenRepository, RoleRepository roleRepository)
     {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.tokenRepository = tokenRepository;
+        this.roleRepository = roleRepository;
     }
     @Override
     public User signup(String name, String email, String password)
@@ -44,6 +50,10 @@ public class UserServiceImpl implements UserService
         user.setName(name);
         user.setEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(password));
+
+        Optional<Role> userRole = roleRepository.findByRoleName("GUEST");
+
+        userRole.ifPresent(role -> user.getRoles().add(role));
 
         return userRepository.save(user);
     }
@@ -83,8 +93,20 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
-    public User validateToken(String tokenValue)
+    public User validateToken(String tokenValue) throws InvalidTokenException
     {
-        return null;
+        Optional<Token> optionalToken = tokenRepository.findByTokenValueAndExpiryDateAfter(tokenValue, new Date());
+
+        /*
+        Modified the method to not throw exception, but return null if token is invalid, so that Product Service handles it gracefully
+         */
+
+        if(optionalToken.isEmpty())
+        {
+            //throw new InvalidTokenException("The token is invalid or has expired");
+            return null;
+        }
+
+        return optionalToken.get().getUser();
     }
 }

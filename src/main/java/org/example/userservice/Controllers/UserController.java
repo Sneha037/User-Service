@@ -4,6 +4,7 @@ import org.example.userservice.DTOs.LoginRequestDTO;
 import org.example.userservice.DTOs.SignUpRequestDTO;
 import org.example.userservice.DTOs.TokenDTO;
 import org.example.userservice.DTOs.UserDTO;
+import org.example.userservice.Exceptions.InvalidTokenException;
 import org.example.userservice.Exceptions.PasswordMismatchException;
 import org.example.userservice.Models.Token;
 import org.example.userservice.Models.User;
@@ -54,8 +55,15 @@ public class UserController
      }
 
      @GetMapping("/validate/{tokenValue}")
-     public UserDTO validateToken(@PathVariable("tokenValue") String tokenValue)
-     {
-         return null;
+     public ResponseEntity<UserDTO> validateToken(@PathVariable("tokenValue") String tokenValue) throws InvalidTokenException {
+         User user = userService.validateToken(tokenValue);
+
+         if(user == null)
+             return null;
+
+         UserDTO userDTO = UserDTO.from(user);
+         ResponseEntity<UserDTO> response = ResponseEntity.ok(userDTO);
+
+         return response;
      }
 }
